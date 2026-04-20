@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discussions — RACINES</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest:#1a3a1a; --moss:#2d5a1b; --fern:#4a8c2a; --leaf:#6db33f;
+    --gold:#c9a227; --earth:#7a4f2e; --cream:#f5f0e8; --white:#fdfaf4; --parchment:#ede5d0;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Cormorant Garamond',serif;background:var(--cream);color:var(--forest);min-height:100vh;}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 2.5rem;background:rgba(253,250,244,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(26,58,26,0.1);}
+  .nav-logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--forest);text-decoration:none;}
+  .nav-logo span{color:var(--gold);}
+  .nav-links{display:flex;gap:1.5rem;align-items:center;list-style:none;}
+  .nav-links a{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--forest);text-decoration:none;opacity:0.7;}
+  .nav-links a:hover{opacity:1;color:var(--fern);}
+  .nav-user{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--fern);}
+
+  /* LAYOUT */
+  .page{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:100vh;padding-top:64px;}
+
+  /* SIDEBAR FORUMS */
+  .forums-sidebar{background:var(--forest);padding:2rem 0;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto;}
+  .fs-title{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);padding:0 1.5rem;margin-bottom:1rem;}
+  .forum-item{display:block;padding:0.85rem 1.5rem;border-left:3px solid transparent;cursor:pointer;transition:all 0.2s;text-decoration:none;}
+  .forum-item:hover,.forum-item.active{background:rgba(109,179,63,0.12);border-left-color:var(--leaf);}
+  .forum-item-name{font-family:'Cormorant Garamond',serif;font-size:1rem;color:rgba(245,240,232,0.9);}
+  .forum-item-cat{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,240,232,0.4);margin-top:0.2rem;}
+
+  /* MAIN CONTENT */
+  .main-content{background:var(--white);padding:2rem;}
+
+  .content-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(26,58,26,0.1);}
+  .content-title{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;}
+  .content-desc{font-size:1rem;color:var(--moss);margin-top:0.3rem;}
+
+  /* SUJETS */
+  .sujet-card{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(26,58,26,0.07);display:flex;gap:1rem;align-items:flex-start;transition:background 0.2s;cursor:pointer;}
+  .sujet-card:hover{background:rgba(109,179,63,0.04);}
+  .sujet-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--fern),var(--leaf));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;flex-shrink:0;}
+  .sujet-body{flex:1;}
+  .sujet-title{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--forest);margin-bottom:0.3rem;}
+  .sujet-title:hover{color:var(--fern);}
+  .sujet-meta{font-family:'Space Mono',monospace;font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(26,58,26,0.4);}
+  .sujet-preview{font-size:0.9rem;color:var(--moss);margin-top:0.3rem;line-height:1.5;}
+  .sujet-stats{display:flex;gap:1rem;font-family:'Space Mono',monospace;font-size:0.6rem;text-transform:uppercase;color:rgba(26,58,26,0.4);flex-shrink:0;text-align:right;}
+  .pin-badge{display:inline-block;background:var(--gold);color:var(--forest);font-family:'Space Mono',monospace;font-size:0.5rem;letter-spacing:0.1em;padding:0.15rem 0.5rem;text-transform:uppercase;margin-right:0.4rem;}
+
+  /* THREAD */
+  .thread-view{display:none;}
+  .thread-view.open{display:block;}
+  .sujets-view{display:block;}
+  .sujets-view.hidden{display:none;}
+
+  .back-btn{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--fern);cursor:pointer;background:none;border:none;display:flex;align-items:center;gap:0.4rem;margin-bottom:1.5rem;padding:0;}
+  .back-btn:hover{color:var(--moss);}
+
+  .thread-title{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;margin-bottom:0.5rem;}
+  .thread-meta{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(26,58,26,0.4);margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(26,58,26,0.1);}
+
+  /* MESSAGES */
+  .message-block{display:flex;gap:1rem;padding:1.5rem 0;border-bottom:1px solid rgba(26,58,26,0.06);}
+  .msg-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--fern),var(--leaf));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;flex-shrink:0;}
+  .msg-body{flex:1;}
+  .msg-author{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--forest);font-weight:700;}
+  .msg-date{font-family:'Space Mono',monospace;font-size:0.55rem;color:rgba(26,58,26,0.35);margin-left:0.8rem;}
+  .msg-content{font-size:1.05rem;line-height:1.75;margin-top:0.5rem;color:var(--moss);}
+  .msg-reactions{display:flex;gap:0.5rem;margin-top:0.8rem;flex-wrap:wrap;}
+  .reaction-btn{background:rgba(26,58,26,0.06);border:1px solid rgba(26,58,26,0.1);padding:0.25rem 0.6rem;font-size:0.9rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:0.3rem;}
+  .reaction-btn:hover{background:rgba(109,179,63,0.15);border-color:var(--fern);}
+  .reaction-btn.active{background:rgba(109,179,63,0.2);border-color:var(--fern);}
+  .reaction-count{font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--fern);}
+
+  /* NOUVEAU SUJET / RÉPONSE */
+  .compose-box{margin-top:2rem;background:var(--parchment);padding:1.5rem;}
+  .compose-title{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--forest);margin-bottom:1rem;}
+  .compose-input,.compose-textarea{width:100%;background:var(--white);border:1px solid rgba(26,58,26,0.2);padding:0.8rem 1rem;font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--forest);outline:none;margin-bottom:0.8rem;transition:border-color 0.2s;}
+  .compose-input:focus,.compose-textarea:focus{border-color:var(--fern);}
+  .compose-textarea{min-height:120px;resize:vertical;}
+  .compose-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+  .compose-auth-note{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(26,58,26,0.4);}
+  .btn{font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.7rem 1.5rem;cursor:pointer;border:none;transition:all 0.2s;}
+  .btn-primary{background:var(--forest);color:var(--cream);}
+  .btn-primary:hover{background:var(--fern);}
+  .btn-outline{background:transparent;border:1px solid var(--forest);color:var(--forest);}
+  .btn-outline:hover{background:var(--forest);color:var(--cream);}
+
+  /* AUTH MODAL */
+  .auth-modal{position:fixed;inset:0;background:rgba(26,58,26,0.6);z-index:500;display:none;align-items:center;justify-content:center;}
+  .auth-modal.open{display:flex;}
+  .auth-box{background:var(--white);padding:2.5rem;width:400px;max-width:95vw;}
+  .auth-box h2{font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:1.5rem;}
+  .auth-box input{width:100%;padding:0.75rem 1rem;border:1px solid rgba(26,58,26,0.2);font-family:'Cormorant Garamond',serif;font-size:1rem;margin-bottom:0.8rem;outline:none;color:var(--forest);background:var(--white);}
+  .auth-box input:focus{border-color:var(--fern);}
+  .auth-tabs{display:flex;gap:0;margin-bottom:1.5rem;}
+  .auth-tab{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;padding:0.6rem 1.2rem;cursor:pointer;border-bottom:2px solid transparent;color:rgba(26,58,26,0.5);}
+  .auth-tab.active{color:var(--fern);border-bottom-color:var(--fern);}
+  .auth-err{color:#c0392b;font-size:0.8rem;margin-top:0.5rem;display:none;}
+  .auth-close{float:right;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--earth);}
+
+  /* EMPTY / LOADING */
+  .empty{text-align:center;padding:3rem;color:rgba(26,58,26,0.35);}
+  .empty-icon{font-size:2.5rem;margin-bottom:0.8rem;}
+  .empty-text{font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;}
+  .new-msg-notif{background:var(--fern);color:var(--cream);text-align:center;padding:0.5rem;font-family:'Space Mono',monospace;font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;display:none;}
+
+  @media(max-width:700px){
+    .page{grid-template-columns:1fr;}
+    .forums-sidebar{position:static;height:auto;}
+    nav{padding:1rem 1rem;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">RAC<span>I</span>NES</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><span class="nav-user" id="nav-user-display"></span></li>
+    <li><button class="btn btn-outline" style="padding:0.4rem 0.8rem" id="auth-btn" onclick="openAuth()">Se connecter</button></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <!-- SIDEBAR FORUMS -->
+  <aside class="forums-sidebar">
+    <div class="fs-title">Forums</div>
+    <div id="forums-list"><div style="padding:1.5rem;color:rgba(245,240,232,0.4);font-size:0.85rem;">Chargement...</div></div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <!-- SUJETS LIST -->
+    <div class="sujets-view" id="sujets-view">
+      <div class="content-head">
+        <div>
+          <div class="content-title" id="forum-title">Choisissez un forum</div>
+          <div class="content-desc" id="forum-desc">Sélectionnez un forum dans la liste à gauche</div>
+        </div>
+        <button class="btn btn-primary" id="new-sujet-btn" onclick="showNewSujet()" style="display:none">+ Nouveau sujet</button>
+      </div>
+      <div id="sujets-list"><div class="empty"><div class="empty-icon">👈</div><div class="empty-text">Sélectionnez un forum</div></div></div>
+
+      <!-- Nouveau sujet -->
+      <div class="compose-box" id="new-sujet-form" style="display:none">
+        <div class="compose-title">Créer un nouveau sujet</div>
+        <input type="text" class="compose-input" id="new-sujet-titre" placeholder="Titre du sujet...">
+        <textarea class="compose-textarea" id="new-sujet-contenu" placeholder="Détaillez votre sujet..."></textarea>
+        <div class="compose-actions">
+          <span class="compose-auth-note" id="new-sujet-auth-note"></span>
+          <div style="display:flex;gap:0.6rem">
+            <button class="btn btn-outline" onclick="document.getElementById('new-sujet-form').style.display='none'">Annuler</button>
+            <button class="btn btn-primary" onclick="createSujet()">Publier le sujet</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THREAD VIEW -->
+    <div class="thread-view" id="thread-view">
+      <button class="back-btn" onclick="closeThread()">← Retour aux sujets</button>
+      <div class="new-msg-notif" id="new-msg-notif" onclick="refreshMessages()">🔔 Nouveau message — Cliquez pour rafraîchir</div>
+      <div class="thread-title" id="thread-title"></div>
+      <div class="thread-meta" id="thread-meta"></div>
+      <div id="messages-list"></div>
+      <div class="compose-box">
+        <div class="compose-title">Votre réponse</div>
+        <textarea class="compose-textarea" id="reply-contenu" placeholder="Rédigez votre réponse..."></textarea>
+        <div class="compose-actions">
+          <span class="compose-auth-note" id="reply-auth-note"></span>
+          <button class="btn btn-primary" onclick="postReply()">Publier la réponse</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="auth-modal" id="auth-modal">
+  <div class="auth-box">
+    <button class="auth-close" onclick="closeAuth()">×</button>
+    <h2>Rejoindre RACINES</h2>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchAuthTab('login',this)">Se connecter</div>
+      <div class="auth-tab" onclick="switchAuthTab('register',this)">S'inscrire</div>
+    </div>
+    <div id="auth-login">
+      <input type="email" id="l-email" placeholder="Email">
+      <input type="password" id="l-pwd" placeholder="Mot de passe">
+      <button class="btn btn-primary" style="width:100%;margin-top:0.5rem" onclick="doLogin()">Se connecter</button>
+    </div>
+    <div id="auth-register" style="display:none">
+      <input type="text" id="r-nom" placeholder="Nom complet">
+      <input type="email" id="r-email" placeholder="Email">
+      <input type="text" id="r-org" placeholder="Organisation (optionnel)">
+      <input type="password" id="r-pwd" placeholder="Mot de passe (min. 8 caractères)">
+      <button class="btn btn-primary" style="width:100%;margin-top:0.5rem" onclick="doRegister()">Créer mon compte</button>
+    </div>
+    <div class="auth-err" id="auth-err"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════
+// CONFIG — Remplacez ces valeurs !
+// ══════════════════════════════════
+const SUPABASE_URL = 'https://dpwgrdqbwpyepxovijhl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwd2dyZHFid3B5ZXB4b3ZpamhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MzE5NjgsImV4cCI6MjA5MjIwNzk2OH0.s2bDpK4gqZL6eW0QVqjP3h6VcfbzUZkPI8aZd_TU9D8';
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null, currentProfile = null;
+let currentForum = null, currentSujet = null;
+let realtimeSub = null;
+
+// ── INIT ──
+sb.auth.getSession().then(({ data: { session } }) => {
+  if(session) setUser(session.user);
+});
+
+async function setUser(user) {
+  currentUser = user;
+  const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  currentProfile = data;
+  document.getElementById('nav-user-display').textContent = data?.nom || user.email;
+  document.getElementById('auth-btn').textContent = 'Se déconnecter';
+  document.getElementById('auth-btn').onclick = doLogout;
+  document.getElementById('new-sujet-btn').style.display = 'block';
+  updateAuthNotes();
+}
+
+function updateAuthNotes() {
+  const note = currentUser ? '' : 'Connectez-vous pour participer';
+  document.querySelectorAll('.compose-auth-note').forEach(el => el.textContent = note);
+}
+
+// ── AUTH ──
+function openAuth() { document.getElementById('auth-modal').classList.add('open'); }
+function closeAuth() { document.getElementById('auth-modal').classList.remove('open'); }
+function switchAuthTab(tab, el) {
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('auth-login').style.display    = tab==='login'?'block':'none';
+  document.getElementById('auth-register').style.display = tab==='register'?'block':'none';
+  document.getElementById('auth-err').style.display = 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('l-email').value;
+  const pwd   = document.getElementById('l-pwd').value;
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
+  if(error) { showAuthErr(error.message); return; }
+  closeAuth(); setUser(data.user);
+}
+
+async function doRegister() {
+  const nom   = document.getElementById('r-nom').value;
+  const email = document.getElementById('r-email').value;
+  const org   = document.getElementById('r-org').value;
+  const pwd   = document.getElementById('r-pwd').value;
+  if(!nom || !email || !pwd) { showAuthErr('Nom, email et mot de passe requis.'); return; }
+  const { data, error } = await sb.auth.signUp({ email, password: pwd, options: { data: { nom } } });
+  if(error) { showAuthErr(error.message); return; }
+  if(org && data.user) await sb.from('profiles').update({ organisation: org }).eq('id', data.user.id);
+  closeAuth(); alert('Compte créé ! Vérifiez votre email si confirmation requise.');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  currentUser = null; currentProfile = null;
+  document.getElementById('nav-user-display').textContent = '';
+  document.getElementById('auth-btn').textContent = 'Se connecter';
+  document.getElementById('auth-btn').onclick = openAuth;
+  document.getElementById('new-sujet-btn').style.display = 'none';
+  updateAuthNotes();
+}
+
+function showAuthErr(msg) { const e=document.getElementById('auth-err'); e.textContent=msg; e.style.display='block'; }
+
+// ── FORUMS ──
+async function loadForums() {
+  const { data } = await sb.from('forums').select('*').order('epingle',{ascending:false}).order('created_at');
+  const el = document.getElementById('forums-list');
+  if(!data?.length) { el.innerHTML='<div style="padding:1.5rem;color:rgba(245,240,232,0.4);font-size:0.85rem;">Aucun forum disponible</div>'; return; }
+  el.innerHTML = data.map(f=>`
+    <div class="forum-item" id="forum-${f.id}" onclick="selectForum(${JSON.stringify(f).replace(/"/g,'&quot;')})">
+      <div class="forum-item-name">${f.titre}</div>
+      <div class="forum-item-cat">${f.categorie}</div>
+    </div>
+  `).join('');
+  // Sélectionner le premier
+  if(data.length) selectForum(data[0]);
+}
+
+async function selectForum(forum) {
+  currentForum = forum;
+  document.querySelectorAll('.forum-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('forum-'+forum.id)?.classList.add('active');
+  document.getElementById('forum-title').textContent = forum.titre;
+  document.getElementById('forum-desc').textContent  = forum.description || '';
+  if(currentUser) document.getElementById('new-sujet-btn').style.display = 'block';
+  closeThread();
+  await loadSujets(forum.id);
+}
+
+async function loadSujets(forumId) {
+  const { data } = await sb.from('sujets')
+    .select('*, profiles(nom), messages(count)')
+    .eq('forum_id', forumId)
+    .order('epingle',{ascending:false})
+    .order('created_at',{ascending:false});
+
+  const el = document.getElementById('sujets-list');
+  if(!data?.length) { el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">Aucun sujet. Soyez le premier !</div></div>'; return; }
+
+  el.innerHTML = data.map(s=>`
+    <div class="sujet-card" onclick="openThread(${JSON.stringify(s).replace(/"/g,'&quot;')})">
+      <div class="sujet-avatar">${(s.profiles?.nom||'?')[0].toUpperCase()}</div>
+      <div class="sujet-body">
+        <div class="sujet-title">
+          ${s.epingle?'<span class="pin-badge">📌 Épinglé</span>':''}${s.titre}
+        </div>
+        <div class="sujet-meta">par ${s.profiles?.nom||'Anonyme'} · ${timeAgo(s.created_at)}</div>
+        <div class="sujet-preview">${(s.contenu||'').substring(0,140)}${s.contenu?.length>140?'…':''}</div>
+      </div>
+      <div class="sujet-stats">
+        <div>${s.messages?.[0]?.count||0}<br><span>réponses</span></div>
+        <div>${s.vues||0}<br><span>vues</span></div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── THREAD ──
+async function openThread(sujet) {
+  currentSujet = sujet;
+  // Incrémenter vues
+  await sb.from('sujets').update({vues:(sujet.vues||0)+1}).eq('id',sujet.id);
+  document.getElementById('thread-title').textContent = sujet.titre;
+  document.getElementById('thread-meta').textContent  = `Posté par ${sujet.profiles?.nom||'Anonyme'} · ${timeAgo(sujet.created_at)} · Forum : ${currentForum?.titre}`;
+  document.getElementById('sujets-view').classList.add('hidden');
+  document.getElementById('thread-view').classList.add('open');
+  document.getElementById('new-sujet-form').style.display = 'none';
+  await loadMessages(sujet.id);
+  subscribeToMessages(sujet.id);
+}
+
+function closeThread() {
+  document.getElementById('sujets-view').classList.remove('hidden');
+  document.getElementById('thread-view').classList.remove('open');
+  document.getElementById('new-msg-notif').style.display = 'none';
+  if(realtimeSub) { sb.removeChannel(realtimeSub); realtimeSub = null; }
+  currentSujet = null;
+}
+
+async function loadMessages(sujetId) {
+  const { data } = await sb.from('messages')
+    .select('*, profiles(nom), reactions(emoji,auteur_id)')
+    .eq('sujet_id', sujetId)
+    .order('created_at',{ascending:true});
+
+  const el = document.getElementById('messages-list');
+  if(!data?.length) { el.innerHTML='<div class="empty"><div class="empty-icon">💬</div><div class="empty-text">Aucun message. Lancez la discussion !</div></div>'; return; }
+
+  el.innerHTML = data.map(m=>{
+    const reactionMap = {};
+    (m.reactions||[]).forEach(r => {
+      if(!reactionMap[r.emoji]) reactionMap[r.emoji]={count:0,mine:false};
+      reactionMap[r.emoji].count++;
+      if(r.auteur_id===currentUser?.id) reactionMap[r.emoji].mine=true;
+    });
+    const emojis = ['👍','❤️','🌱','👏','💡'];
+    const reactBtns = emojis.map(e=>{
+      const info = reactionMap[e]||{count:0,mine:false};
+      return `<button class="reaction-btn ${info.mine?'active':''}" onclick="toggleReaction('${m.id}','${e}')">
+        ${e} ${info.count>0?`<span class="reaction-count">${info.count}</span>`:''}
+      </button>`;
+    }).join('');
+    return `<div class="message-block" id="msg-${m.id}">
+      <div class="msg-avatar">${(m.profiles?.nom||'?')[0].toUpperCase()}</div>
+      <div class="msg-body">
+        <div><span class="msg-author">${m.profiles?.nom||'Anonyme'}</span><span class="msg-date">${timeAgo(m.created_at)}</span></div>
+        <div class="msg-content">${m.contenu.replace(/\n/g,'<br>')}</div>
+        <div class="msg-reactions">${reactBtns}</div>
+      </div>
+    </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function refreshMessages() {
+  document.getElementById('new-msg-notif').style.display='none';
+  if(currentSujet) await loadMessages(currentSujet.id);
+}
+
+// ── REALTIME ──
+function subscribeToMessages(sujetId) {
+  if(realtimeSub) sb.removeChannel(realtimeSub);
+  realtimeSub = sb.channel('messages-'+sujetId)
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages', filter:`sujet_id=eq.${sujetId}` },
+      (payload) => {
+        if(payload.new.auteur_id !== currentUser?.id) {
+          document.getElementById('new-msg-notif').style.display='block';
+        } else {
+          loadMessages(sujetId);
+        }
+      })
+    .subscribe();
+}
+
+// ── POSTER ──
+function showNewSujet() {
+  if(!currentUser) { openAuth(); return; }
+  if(!currentForum) { alert('Sélectionnez un forum d\'abord.'); return; }
+  const f = document.getElementById('new-sujet-form');
+  f.style.display = f.style.display==='none' ? 'block' : 'none';
+}
+
+async function createSujet() {
+  if(!currentUser) { openAuth(); return; }
+  const titre   = document.getElementById('new-sujet-titre').value.trim();
+  const contenu = document.getElementById('new-sujet-contenu').value.trim();
+  if(!titre || !contenu) { alert('Titre et contenu requis.'); return; }
+  const { data, error } = await sb.from('sujets').insert({
+    forum_id: currentForum.id, titre, contenu, auteur_id: currentUser.id
+  }).select().single();
+  if(error) { alert('Erreur : '+error.message); return; }
+  document.getElementById('new-sujet-titre').value = '';
+  document.getElementById('new-sujet-contenu').value = '';
+  document.getElementById('new-sujet-form').style.display = 'none';
+  await loadSujets(currentForum.id);
+  openThread(data);
+}
+
+async function postReply() {
+  if(!currentUser) { openAuth(); return; }
+  const contenu = document.getElementById('reply-contenu').value.trim();
+  if(!contenu) { alert('Le message ne peut pas être vide.'); return; }
+  const { error } = await sb.from('messages').insert({
+    sujet_id: currentSujet.id, contenu, auteur_id: currentUser.id
+  });
+  if(error) { alert('Erreur : '+error.message); return; }
+  document.getElementById('reply-contenu').value = '';
+  await loadMessages(currentSujet.id);
+}
+
+async function toggleReaction(messageId, emoji) {
+  if(!currentUser) { openAuth(); return; }
+  const { data: existing } = await sb.from('reactions').select('id').eq('message_id',messageId).eq('auteur_id',currentUser.id).eq('emoji',emoji).single();
+  if(existing) {
+    await sb.from('reactions').delete().eq('id',existing.id);
+  } else {
+    await sb.from('reactions').insert({message_id:messageId,auteur_id:currentUser.id,emoji});
+  }
+  await loadMessages(currentSujet.id);
+}
+
+// ── HELPERS ──
+function timeAgo(dateStr) {
+  const diff = (Date.now() - new Date(dateStr)) / 1000;
+  if(diff < 60) return 'à l\'instant';
+  if(diff < 3600) return `il y a ${Math.floor(diff/60)} min`;
+  if(diff < 86400) return `il y a ${Math.floor(diff/3600)} h`;
+  return `il y a ${Math.floor(diff/86400)} j`;
+}
+
+// ── START ──
+loadForums();
+updateAuthNotes();
+document.getElementById('auth-modal').addEventListener('click', e => { if(e.target===document.getElementById('auth-modal')) closeAuth(); });
+</script>
+</body>
+</html>
