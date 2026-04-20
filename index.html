@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RACINES – Réseau d'Action Communautaire pour l'Innovation, la Nature et les Écosystèmes Sylvicoles</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --forest:   #1a3a1a;
@@ -636,7 +637,7 @@
       <label class="form-label">Message</label>
       <textarea class="form-textarea" placeholder="Comment pouvons-nous collaborer ?"></textarea>
     </div>
-    <button class="form-submit" onclick="this.textContent='Message envoyé ✓'; this.style.background='#4a8c2a';">Envoyer le message</button>
+    <button class="form-submit" onclick="envoyerContact(this)">Envoyer le message</button>
   </div>
 </section>
 
@@ -687,5 +688,41 @@
     nav.style.boxShadow = window.scrollY > 50 ? '0 2px 20px rgba(26,58,26,0.12)' : 'none';
   });
 </script>
+
+<script>
+const sb = supabase.createClient(
+  'https://dpwgrdqbwpyepxovijhl.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwd2dyZHFid3B5ZXB4b3ZpamhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MzE5NjgsImV4cCI6MjA5MjIwNzk2OH0.s2bDpK4gqZL6eW0QVqjP3h6VcfbzUZkPI8aZd_TU9D8'
+);
+
+async function envoyerContact(btn) {
+  const nom         = document.querySelector('#contact input[type="text"]').value.trim();
+  const email       = document.querySelector('#contact input[type="email"]').value.trim();
+  const organisation= document.querySelectorAll('#contact input[type="text"]')[1]?.value.trim();
+  const message     = document.querySelector('#contact textarea').value.trim();
+
+  if (!nom || !email || !message) {
+    alert('Veuillez remplir au moins le nom, l\'email et le message.');
+    return;
+  }
+
+  btn.textContent = 'Envoi en cours...';
+  btn.disabled = true;
+
+  const { error } = await sb.from('contacts').insert({
+    nom, email, organisation, message
+  });
+
+  if (error) {
+    alert('Erreur : ' + error.message);
+    btn.textContent = 'Envoyer le message';
+    btn.disabled = false;
+  } else {
+    btn.textContent = 'Message envoyé ✓';
+    btn.style.background = '#4a8c2a';
+  }
+}
+</script>
+
 </body>
 </html>
