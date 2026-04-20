@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RACINES – Réseau d'Action Communautaire pour l'Innovation, la Nature et les Écosystèmes Sylvicoles</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest:   #1a3a1a;
+    --moss:     #2d5a1b;
+    --fern:     #4a8c2a;
+    --leaf:     #6db33f;
+    --gold:     #c9a227;
+    --earth:    #7a4f2e;
+    --soil:     #3d2610;
+    --cream:    #f5f0e8;
+    --parchment:#ede5d0;
+    --white:    #fdfaf4;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--white);
+    color: var(--forest);
+    font-family: 'Cormorant Garamond', serif;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 3rem;
+    background: rgba(253, 250, 244, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(26,58,26,0.1);
+    transition: all 0.4s ease;
+  }
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--forest);
+    letter-spacing: 0.12em;
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--forest);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+  }
+  .nav-links a:hover { opacity: 1; color: var(--fern); }
+  .nav-cta {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: var(--forest);
+    color: var(--cream);
+    padding: 0.6rem 1.4rem;
+    text-decoration: none;
+    transition: background 0.3s;
+  }
+  .nav-cta:hover { background: var(--fern); }
+
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 8rem 3rem 4rem;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, var(--white) 0%, var(--cream) 60%, #e8eed8 100%);
+  }
+  .hero-bg-svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; opacity: 0.06;
+  }
+  .hero-left { padding-right: 4rem; animation: fadeUp 1s ease both; }
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.25em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem;
+  }
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(4rem, 8vw, 8rem);
+    font-weight: 900; line-height: 0.9;
+    color: var(--forest); letter-spacing: -0.02em; margin-bottom: 1.5rem;
+  }
+  .hero-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic; font-size: 1.4rem;
+    color: var(--earth); line-height: 1.5; margin-bottom: 0.6rem;
+    border-left: 3px solid var(--gold); padding-left: 1rem;
+  }
+  .hero-desc {
+    font-size: 1.05rem; color: var(--moss);
+    line-height: 1.7; margin-bottom: 2.5rem; max-width: 480px;
+  }
+  .hero-tags { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 2.5rem; }
+  .hero-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase;
+    border: 1px solid var(--fern); color: var(--fern); padding: 0.35rem 0.8rem;
+  }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-primary {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+    background: var(--forest); color: var(--cream);
+    padding: 1rem 2rem; text-decoration: none;
+    transition: all 0.3s; border: 2px solid var(--forest);
+  }
+  .btn-primary:hover { background: var(--fern); border-color: var(--fern); }
+  .btn-secondary {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+    background: transparent; color: var(--forest);
+    padding: 1rem 2rem; text-decoration: none;
+    border: 2px solid var(--forest); transition: all 0.3s;
+  }
+  .btn-secondary:hover { background: var(--forest); color: var(--cream); }
+
+  .hero-right {
+    display: flex; align-items: center; justify-content: center;
+    animation: fadeUp 1s 0.3s ease both;
+  }
+  .tree-circle {
+    width: min(480px, 90vw); height: min(480px, 90vw);
+    border-radius: 50%; border: 2px solid var(--gold);
+    background: radial-gradient(ellipse at 50% 40%, #e8f5d0 0%, var(--cream) 70%);
+    position: relative; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 8px rgba(201,162,39,0.08), 0 20px 60px rgba(26,58,26,0.15);
+    overflow: hidden;
+  }
+  .tree-circle::before {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+    height: 48%; background: linear-gradient(to bottom, transparent, rgba(122,79,46,0.07));
+  }
+  .tree-svg-wrap { width: 85%; height: 85%; }
+  .tree-circle::after {
+    content: ''; position: absolute; inset: -6px; border-radius: 50%;
+    border: 1px dashed rgba(201,162,39,0.4);
+    animation: spin 60s linear infinite;
+  }
+
+  .band {
+    background: var(--forest); color: var(--cream);
+    padding: 1.2rem 3rem; display: flex; align-items: center; gap: 2rem;
+    overflow: hidden; white-space: nowrap;
+  }
+  .band-inner {
+    display: flex; gap: 3rem;
+    animation: marquee 25s linear infinite;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.9;
+  }
+  .band-dot { color: var(--gold); }
+
+  section { padding: 7rem 3rem; }
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 0.8rem; display: block;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700; line-height: 1.1; color: var(--forest); margin-bottom: 1.5rem;
+  }
+  .section-body { font-size: 1.1rem; line-height: 1.8; color: #3a5a2a; max-width: 640px; }
+
+  .about {
+    background: var(--parchment);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center;
+  }
+  .about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .stat-card {
+    background: var(--white); padding: 2rem 1.5rem;
+    position: relative; overflow: hidden; transition: transform 0.3s;
+  }
+  .stat-card:hover { transform: translateY(-4px); }
+  .stat-card::before {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 3px; background: var(--fern);
+    transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease;
+  }
+  .stat-card:hover::before { transform: scaleX(1); }
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem; font-weight: 900; color: var(--fern); line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--earth); margin-top: 0.4rem;
+  }
+
+  .pillars { background: var(--forest); color: var(--cream); }
+  .pillars .section-title { color: var(--cream); }
+  .pillars .section-body { color: rgba(245,240,232,0.75); }
+  .pillars-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1px; margin-top: 4rem; background: rgba(245,240,232,0.1);
+  }
+  .pillar-card {
+    background: var(--forest); padding: 2.5rem 2rem;
+    position: relative; overflow: hidden; transition: background 0.4s; cursor: default;
+  }
+  .pillar-card:hover { background: var(--moss); }
+  .pillar-icon { font-size: 2.5rem; margin-bottom: 1.2rem; display: block; }
+  .pillar-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 5rem; font-weight: 900; color: rgba(109,179,63,0.12);
+    position: absolute; top: 1rem; right: 1rem; line-height: 1;
+  }
+  .pillar-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem; font-weight: 700; color: var(--leaf); margin-bottom: 0.8rem;
+  }
+  .pillar-text { font-size: 0.95rem; line-height: 1.7; color: rgba(245,240,232,0.75); }
+  .pillar-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 2px; background: var(--gold);
+    transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease;
+  }
+  .pillar-card:hover::after { transform: scaleX(1); }
+
+  .mission { background: var(--cream); text-align: center; padding: 7rem 3rem; position: relative; }
+  .mission-quote {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: clamp(1.8rem, 3.5vw, 3rem); color: var(--forest);
+    max-width: 900px; margin: 0 auto 2rem; line-height: 1.4; position: relative;
+  }
+  .mission-quote::before {
+    content: '«'; font-size: 6rem; color: var(--gold); opacity: 0.3;
+    position: absolute; top: -2rem; left: -3rem; font-style: normal; line-height: 1;
+  }
+  .mission-author {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--earth);
+  }
+  .mission-divider { width: 60px; height: 1px; background: var(--gold); margin: 1.5rem auto; }
+
+  .actions {
+    background: var(--white);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start;
+  }
+  .actions-list { list-style: none; margin-top: 2rem; }
+  .actions-list li {
+    padding: 1.2rem 0; border-bottom: 1px solid rgba(26,58,26,0.1);
+    display: flex; align-items: flex-start; gap: 1rem;
+    font-size: 1.05rem; line-height: 1.6; color: var(--moss); transition: padding-left 0.3s;
+  }
+  .actions-list li:hover { padding-left: 0.5rem; }
+  .actions-list li::before { content: '⊕'; color: var(--fern); font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .actions-image {
+    background: linear-gradient(135deg, var(--parchment), #d4e8b8);
+    border: 1px solid rgba(26,58,26,0.1); height: 420px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .rings { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .ring { position: absolute; border-radius: 50%; border: 1px solid rgba(45,90,27,0.15); }
+
+  .location-strip {
+    background: var(--soil); color: var(--cream);
+    padding: 2rem 3rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+  }
+  .location-flag { font-size: 1.5rem; }
+  .location-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.85;
+  }
+  .location-dot { color: var(--gold); margin: 0 0.5rem; }
+
+  .contact {
+    background: var(--parchment);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center;
+  }
+  .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--moss);
+  }
+  .form-input, .form-textarea {
+    background: var(--white); border: 1px solid rgba(26,58,26,0.2);
+    padding: 0.85rem 1rem; font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem; color: var(--forest); outline: none; transition: border-color 0.3s;
+  }
+  .form-input:focus, .form-textarea:focus { border-color: var(--fern); }
+  .form-textarea { min-height: 120px; resize: vertical; }
+  .form-submit {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;
+    background: var(--forest); color: var(--cream);
+    border: none; padding: 1rem 2rem; cursor: pointer; transition: background 0.3s; align-self: flex-start;
+  }
+  .form-submit:hover { background: var(--fern); }
+
+  footer { background: var(--forest); color: rgba(245,240,232,0.7); padding: 4rem 3rem 2rem; }
+  .footer-top {
+    display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 4rem;
+    padding-bottom: 3rem; border-bottom: 1px solid rgba(245,240,232,0.1); margin-bottom: 2rem;
+  }
+  .footer-brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem; font-weight: 900; color: var(--cream); letter-spacing: 0.08em; margin-bottom: 0.8rem;
+  }
+  .footer-tagline { font-style: italic; font-size: 1rem; color: var(--gold); margin-bottom: 1rem; }
+  .footer-desc { font-size: 0.9rem; line-height: 1.7; }
+  .footer-col-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.2rem;
+  }
+  .footer-links { list-style: none; }
+  .footer-links li { margin-bottom: 0.6rem; }
+  .footer-links a { text-decoration: none; color: rgba(245,240,232,0.65); font-size: 0.9rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--leaf); }
+  .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+  .footer-copy { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em; opacity: 0.5; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes grow { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
+  @keyframes sway { 0%, 100% { transform: rotate(-2deg) translateX(0); } 50% { transform: rotate(2deg) translateX(4px); } }
+
+  .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; text-align: center; padding-top: 6rem; }
+    .hero-right { display: none; }
+    .hero-tags, .hero-btns { justify-content: center; }
+    .about, .actions, .contact { grid-template-columns: 1fr; }
+    .pillars-grid { grid-template-columns: 1fr 1fr; }
+    .footer-top { grid-template-columns: 1fr; gap: 2rem; }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links, .nav-cta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">RAC<span>I</span>NES</a>
+  <ul class="nav-links">
+    <li><a href="#about">À propos</a></li>
+    <li><a href="#pillars">Piliers</a></li>
+    <li><a href="#actions">Actions</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Rejoindre le réseau</a>
+</nav>
+
+<section class="hero">
+  <svg class="hero-bg-svg" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid slice">
+    <g stroke="#2d5a1b" stroke-width="1.5" fill="none" stroke-dasharray="8,4">
+      <path d="M700,900 C700,700 650,600 580,500 C520,420 420,380 300,300" style="stroke-dasharray:1000;animation:grow 4s ease forwards;"/>
+      <path d="M700,900 C700,680 750,560 830,460 C900,370 980,340 1100,260" style="stroke-dasharray:1000;animation:grow 4s 0.5s ease forwards;"/>
+      <path d="M700,900 C690,720 660,640 600,560 C540,470 460,430 380,360" style="stroke-dasharray:800;animation:grow 3.5s 0.2s ease forwards;"/>
+      <path d="M700,900 C710,700 740,610 800,530 C860,450 940,420 1000,350" style="stroke-dasharray:700;animation:grow 3.5s 0.7s ease forwards;"/>
+    </g>
+  </svg>
+
+  <div class="hero-left">
+    <span class="hero-eyebrow">Douala, Cameroun · Fondé 2023</span>
+    <h1 class="hero-title">RACINES</h1>
+    <p class="hero-subtitle">«&nbsp;S'ancrer dans les territoires pour mieux s'élever.&nbsp;»</p>
+    <p class="hero-desc">Réseau d'Action Communautaire pour l'Innovation, la Nature et les Écosystèmes Sylvicoles — construire des communautés résilientes à travers la gestion durable des forêts.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">Foresterie</span>
+      <span class="hero-tag">Gouvernance</span>
+      <span class="hero-tag">Financement</span>
+      <span class="hero-tag">Communautés</span>
+    </div>
+    <div class="hero-btns">
+      <a href="#pillars" class="btn-primary">Nos piliers</a>
+      <a href="#contact" class="btn-secondary">Nous rejoindre</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="tree-circle">
+      <svg class="tree-svg-wrap" viewBox="0 0 400 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#7a4f2e" stroke-width="3.5" stroke-linecap="round" fill="none">
+          <path d="M200 260 C185 290 165 310 140 340" style="animation: grow 2s 1s ease forwards; stroke-dasharray:200; stroke-dashoffset:200;"/>
+          <path d="M200 260 C200 295 198 320 195 355" style="animation: grow 2s 1.2s ease forwards; stroke-dasharray:200; stroke-dashoffset:200;"/>
+          <path d="M200 260 C215 290 235 308 260 340" style="animation: grow 2s 1.4s ease forwards; stroke-dasharray:200; stroke-dashoffset:200;"/>
+          <path d="M190 270 C175 295 155 308 130 315" stroke-width="2"/>
+          <path d="M210 275 C230 300 255 312 280 320" stroke-width="2"/>
+          <path d="M198 285 C185 310 170 328 148 345" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <path d="M202 285 C218 308 235 328 258 343" stroke-width="1.5" stroke-dasharray="4,3"/>
+        </g>
+        <line x1="80" y1="255" x2="320" y2="255" stroke="#3d2610" stroke-width="1.5" opacity="0.4"/>
+        <path d="M186 255 C183 230 180 200 180 160" stroke="#5a3520" stroke-width="12" stroke-linecap="round" fill="none"/>
+        <path d="M214 255 C217 230 220 200 220 160" stroke="#5a3520" stroke-width="8" stroke-linecap="round" fill="none"/>
+        <g stroke="#4a8c2a" stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M195 170 C185 155 165 140 140 125"/>
+          <path d="M205 170 C218 155 240 140 268 125"/>
+          <path d="M198 150 C188 130 175 110 160 90"/>
+          <path d="M202 150 C215 128 230 110 248 90"/>
+          <path d="M200 130 C200 110 200 90 200 70"/>
+          <path d="M190 160 C175 145 155 135 130 130" stroke-width="2.5"/>
+          <path d="M210 160 C228 145 248 135 272 130" stroke-width="2.5"/>
+        </g>
+        <g opacity="0.9" style="animation: sway 4s ease-in-out infinite;">
+          <circle cx="160" cy="95" r="28" fill="#4a8c2a"/>
+          <circle cx="145" cy="80" r="20" fill="#6db33f"/>
+          <circle cx="170" cy="78" r="22" fill="#5a9e30"/>
+          <circle cx="135" cy="95" r="16" fill="#3d7a22"/>
+        </g>
+        <g opacity="0.9" style="animation: sway 4s 0.5s ease-in-out infinite;">
+          <circle cx="240" cy="93" r="26" fill="#4a8c2a"/>
+          <circle cx="255" cy="78" r="20" fill="#6db33f"/>
+          <circle cx="232" cy="77" r="22" fill="#5a9e30"/>
+          <circle cx="265" cy="96" r="16" fill="#4a8c2a"/>
+        </g>
+        <g opacity="0.9" style="animation: sway 5s 1s ease-in-out infinite;">
+          <circle cx="200" cy="55" r="30" fill="#6db33f"/>
+          <circle cx="215" cy="42" r="22" fill="#8ac840"/>
+          <circle cx="185" cy="42" r="22" fill="#7ab530"/>
+          <circle cx="200" cy="35" r="18" fill="#9de050"/>
+        </g>
+        <g opacity="0.85">
+          <circle cx="118" cy="118" r="20" fill="#5a9e30"/>
+          <circle cx="282" cy="116" r="20" fill="#5a9e30"/>
+          <circle cx="165" cy="108" r="16" fill="#6db33f"/>
+          <circle cx="235" cy="108" r="16" fill="#6db33f"/>
+        </g>
+        <g fill="#1a3a1a" opacity="0.75">
+          <circle cx="130" cy="230" r="6"/>
+          <line x1="130" y1="236" x2="130" y2="252" stroke="#1a3a1a" stroke-width="2.5"/>
+          <line x1="122" y1="242" x2="138" y2="242" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="130" y1="252" x2="124" y2="262" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="130" y1="252" x2="136" y2="262" stroke="#1a3a1a" stroke-width="2"/>
+          <circle cx="160" cy="232" r="6"/>
+          <line x1="160" y1="238" x2="160" y2="253" stroke="#1a3a1a" stroke-width="2.5"/>
+          <line x1="152" y1="243" x2="168" y2="243" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="160" y1="253" x2="154" y2="263" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="160" y1="253" x2="166" y2="263" stroke="#1a3a1a" stroke-width="2"/>
+          <circle cx="190" cy="229" r="6"/>
+          <line x1="190" y1="235" x2="190" y2="251" stroke="#1a3a1a" stroke-width="2.5"/>
+          <line x1="182" y1="240" x2="198" y2="240" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="190" y1="251" x2="184" y2="261" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="190" y1="251" x2="196" y2="261" stroke="#1a3a1a" stroke-width="2"/>
+          <circle cx="220" cy="231" r="6"/>
+          <line x1="220" y1="237" x2="220" y2="252" stroke="#1a3a1a" stroke-width="2.5"/>
+          <line x1="212" y1="242" x2="228" y2="242" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="220" y1="252" x2="214" y2="262" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="220" y1="252" x2="226" y2="262" stroke="#1a3a1a" stroke-width="2"/>
+          <circle cx="250" cy="230" r="6"/>
+          <line x1="250" y1="236" x2="250" y2="252" stroke="#1a3a1a" stroke-width="2.5"/>
+          <line x1="242" y1="241" x2="258" y2="241" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="250" y1="252" x2="244" y2="262" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="250" y1="252" x2="256" y2="262" stroke="#1a3a1a" stroke-width="2"/>
+          <circle cx="278" cy="231" r="6"/>
+          <line x1="278" y1="237" x2="278" y2="252" stroke="#1a3a1a" stroke-width="2.5"/>
+          <line x1="270" y1="242" x2="286" y2="242" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="278" y1="252" x2="272" y2="262" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="278" y1="252" x2="284" y2="262" stroke="#1a3a1a" stroke-width="2"/>
+          <line x1="136" y1="242" x2="152" y2="242" stroke="#1a3a1a" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <line x1="166" y1="243" x2="182" y2="240" stroke="#1a3a1a" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <line x1="196" y1="240" x2="212" y2="242" stroke="#1a3a1a" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <line x1="228" y1="242" x2="242" y2="241" stroke="#1a3a1a" stroke-width="1.5" stroke-dasharray="3,2"/>
+          <line x1="256" y1="241" x2="270" y2="242" stroke="#1a3a1a" stroke-width="1.5" stroke-dasharray="3,2"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="band">
+  <div class="band-inner">
+    <span>Foresterie Durable</span><span class="band-dot">◆</span>
+    <span>Gouvernance Locale</span><span class="band-dot">◆</span>
+    <span>Financement Vert</span><span class="band-dot">◆</span>
+    <span>Communautés Résilientes</span><span class="band-dot">◆</span>
+    <span>Douala, Cameroun</span><span class="band-dot">◆</span>
+    <span>Innovation Sylvicole</span><span class="band-dot">◆</span>
+    <span>Écosystèmes Vivants</span><span class="band-dot">◆</span>
+    <span>Foresterie Durable</span><span class="band-dot">◆</span>
+    <span>Gouvernance Locale</span><span class="band-dot">◆</span>
+    <span>Financement Vert</span><span class="band-dot">◆</span>
+    <span>Communautés Résilientes</span><span class="band-dot">◆</span>
+    <span>Douala, Cameroun</span><span class="band-dot">◆</span>
+    <span>Innovation Sylvicole</span><span class="band-dot">◆</span>
+    <span>Écosystèmes Vivants</span><span class="band-dot">◆</span>
+  </div>
+</div>
+
+<section class="about reveal" id="about">
+  <div>
+    <span class="section-label">Qui sommes-nous</span>
+    <h2 class="section-title">Enracinés dans la forêt, engagés pour les peuples</h2>
+    <p class="section-body">RACINES est un réseau d'action communautaire qui unit forestiers, communautés locales, institutions et bailleurs autour d'une vision commune : des écosystèmes sylvicoles sains, gérés équitablement et financés durablement au profit des générations futures.</p>
+    <br>
+    <p class="section-body">Né à Douala, notre réseau rayonne à travers le Cameroun et le bassin du Congo, tissant des liens entre le terrain et les sphères de décision.</p>
+  </div>
+  <div class="about-stats">
+    <div class="stat-card"><div class="stat-number">12+</div><div class="stat-label">Communautés partenaires</div></div>
+    <div class="stat-card"><div class="stat-number">5</div><div class="stat-label">Régions couvertes</div></div>
+    <div class="stat-card"><div class="stat-number">40K</div><div class="stat-label">Hectares suivis</div></div>
+    <div class="stat-card"><div class="stat-number">80+</div><div class="stat-label">Membres actifs</div></div>
+  </div>
+</section>
+
+<section class="pillars reveal" id="pillars">
+  <span class="section-label">Nos quatre piliers</span>
+  <h2 class="section-title">Les fondements de notre action</h2>
+  <p class="section-body">Chaque pilier représente un axe d'intervention où RACINES déploie expertise, plaidoyer et solutions concrètes.</p>
+  <div class="pillars-grid">
+    <div class="pillar-card">
+      <span class="pillar-num">01</span><span class="pillar-icon">🌳</span>
+      <div class="pillar-title">Foresterie</div>
+      <p class="pillar-text">Gestion durable, agroforesterie et restauration des écosystèmes forestiers dégradés.</p>
+    </div>
+    <div class="pillar-card">
+      <span class="pillar-num">02</span><span class="pillar-icon">⚖️</span>
+      <div class="pillar-title">Gouvernance</div>
+      <p class="pillar-text">Plaidoyer pour des politiques forestières inclusives et participation citoyenne.</p>
+    </div>
+    <div class="pillar-card">
+      <span class="pillar-num">03</span><span class="pillar-icon">💰</span>
+      <div class="pillar-title">Financement</div>
+      <p class="pillar-text">Mobilisation de financements verts, carbone et philanthropiques pour les forêts communautaires.</p>
+    </div>
+    <div class="pillar-card">
+      <span class="pillar-num">04</span><span class="pillar-icon">🤝</span>
+      <div class="pillar-title">Communautés</div>
+      <p class="pillar-text">Les communautés locales au cœur de chaque décision et valorisation des gardiens de la forêt.</p>
+    </div>
+  </div>
+</section>
+
+<section class="mission reveal">
+  <span class="section-label">Notre vision</span>
+  <p class="mission-quote">S'ancrer dans les territoires pour mieux s'élever — des racines profondes qui portent des forêts debout et des communautés épanouies.</p>
+  <div class="mission-divider"></div>
+  <span class="mission-author">Réseau RACINES · Douala, Cameroun</span>
+</section>
+
+<section class="actions reveal" id="actions">
+  <div>
+    <span class="section-label">Nos domaines d'action</span>
+    <h2 class="section-title">Ce que nous faisons concrètement</h2>
+    <p class="section-body">De la cartographie participative aux négociations climatiques, RACINES intervient à toutes les échelles.</p>
+    <ul class="actions-list">
+      <li>Appui technique à la création de forêts communautaires</li>
+      <li>Formation en gestion durable des ressources naturelles</li>
+      <li>Développement de projets carbone REDD+ et articles 6</li>
+      <li>Cartographie participative et SIG communautaire</li>
+      <li>Plaidoyer aux niveaux national et international</li>
+      <li>Mise en réseau d'acteurs de la société civile forestière</li>
+      <li>Publication et diffusion de connaissances sylvicoles</li>
+    </ul>
+  </div>
+  <div class="actions-image">
+    <div class="rings">
+      <div class="ring" style="width:340px;height:340px;"></div>
+      <div class="ring" style="width:260px;height:260px;"></div>
+      <div class="ring" style="width:180px;height:180px;"></div>
+      <div class="ring" style="width:100px;height:100px;"></div>
+    </div>
+    <svg viewBox="0 0 200 200" width="220" style="position:relative;z-index:2;">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="#2d5a1b" stroke-width="1.5" opacity="0.3"/>
+      <line x1="100" y1="140" x2="100" y2="180" stroke="#7a4f2e" stroke-width="4"/>
+      <path d="M100,140 C90,120 70,100 55,80" stroke="#4a8c2a" stroke-width="3" fill="none"/>
+      <path d="M100,140 C110,120 130,100 145,80" stroke="#4a8c2a" stroke-width="3" fill="none"/>
+      <path d="M100,130 C100,110 100,90 100,70" stroke="#4a8c2a" stroke-width="3" fill="none"/>
+      <circle cx="100" cy="55" r="22" fill="#6db33f"/>
+      <circle cx="60" cy="70" r="16" fill="#4a8c2a"/>
+      <circle cx="140" cy="70" r="16" fill="#4a8c2a"/>
+      <text x="100" y="195" font-family="'Space Mono',monospace" font-size="8" fill="#2d5a1b" text-anchor="middle" letter-spacing="3" opacity="0.7">RACINES</text>
+    </svg>
+  </div>
+</section>
+
+<div class="location-strip">
+  <span class="location-flag">🇨🇲</span>
+  <span class="location-text">Douala, Cameroun</span><span class="location-dot">·</span>
+  <span class="location-text">Bassin du Congo</span><span class="location-dot">·</span>
+  <span class="location-text">Afrique Centrale</span><span class="location-dot">·</span>
+  <span class="location-text">foresterie · gouvernance · financement · communautés</span>
+</div>
+
+<section class="contact reveal" id="contact">
+  <div>
+    <span class="section-label">Nous contacter</span>
+    <h2 class="section-title">Rejoignez le mouvement</h2>
+    <p class="section-body">Vous partagez notre vision ? Que vous soyez communauté locale, institution, bailleur ou chercheur, RACINES vous accueille.</p>
+    <br>
+    <p class="section-body" style="font-style:italic; color: var(--earth);">« Les forêts ne poussent pas seules. Les réseaux non plus. »</p>
+  </div>
+  <div class="contact-form">
+    <div class="form-group">
+      <label class="form-label">Nom complet</label>
+      <input type="text" class="form-input" placeholder="Votre nom">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" placeholder="contact@exemple.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Organisation</label>
+      <input type="text" class="form-input" placeholder="Votre organisation (optionnel)">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Message</label>
+      <textarea class="form-textarea" placeholder="Comment pouvons-nous collaborer ?"></textarea>
+    </div>
+    <button class="form-submit" onclick="this.textContent='Message envoyé ✓'; this.style.background='#4a8c2a';">Envoyer le message</button>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">RACINES</div>
+      <div class="footer-tagline">«&nbsp;S'ancrer dans les territoires pour mieux s'élever.&nbsp;»</div>
+      <p class="footer-desc">Réseau d'Action Communautaire pour l'Innovation, la Nature et les Écosystèmes Sylvicoles. Basé à Douala, actif à travers le bassin du Congo.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Navigation</div>
+      <ul class="footer-links">
+        <li><a href="#about">À propos</a></li>
+        <li><a href="#pillars">Nos piliers</a></li>
+        <li><a href="#actions">Nos actions</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Thématiques</div>
+      <ul class="footer-links">
+        <li><a href="#">Foresterie</a></li>
+        <li><a href="#">Gouvernance</a></li>
+        <li><a href="#">Financement</a></li>
+        <li><a href="#">Communautés</a></li>
+        <li><a href="#">Publications</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2025 RACINES — Douala, Cameroun. Tous droits réservés.</span>
+    <span class="footer-copy">Foresterie · Gouvernance · Financement · Communautés</span>
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('nav');
+    nav.style.padding = window.scrollY > 50 ? '0.8rem 3rem' : '1.2rem 3rem';
+    nav.style.boxShadow = window.scrollY > 50 ? '0 2px 20px rgba(26,58,26,0.12)' : 'none';
+  });
+</script>
+</body>
+</html>
